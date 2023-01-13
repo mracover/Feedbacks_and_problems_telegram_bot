@@ -1,5 +1,6 @@
-package com.mracover.telegram_bot.controller;
+package com.mracover.telegram_bot.service;
 
+import com.mracover.telegram_bot.config.BotConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -11,26 +12,20 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 @Component
 public class TelegramBot extends TelegramLongPollingBot {
 
-    private final String botName;
-    private final String botToken;
+    private final BotConfig botConfig;
 
-    public TelegramBot(
-            TelegramBotsApi botsApi,
-            @Value("${bot.token}") String botToken,
-            @Value("${bot.name}") String botName) throws TelegramApiException {
-            this.botName = botName;
-            this.botToken = botToken;
-            botsApi.registerBot(this);
+    public TelegramBot(BotConfig botConfig) {
+        this.botConfig = botConfig;
     }
 
     @Override
     public String getBotUsername() {
-        return botName;
+        return botConfig.getBotName();
     }
 
     @Override
     public String getBotToken() {
-        return botToken;
+        return botConfig.getBotToken();
     }
 
     @Override
