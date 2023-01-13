@@ -2,7 +2,6 @@ package com.mracover.telegram_bot.service.impl;
 
 import com.mracover.telegram_bot.exception.DatabaseException;
 import com.mracover.telegram_bot.exception.messageException.NoSuchMessageException;
-import com.mracover.telegram_bot.exception.userException.NoSuchUserException;
 import com.mracover.telegram_bot.model.Message;
 import com.mracover.telegram_bot.repository.MessageRepository;
 import com.mracover.telegram_bot.service.MessageService;
@@ -19,75 +18,59 @@ public class MessageServiceImpl implements MessageService {
     }
     @Override
     @Transactional
-    public Message addMessage(Message message) {
+    public Message addMessage(Message message) throws DatabaseException {
         try {
             return messageRepository.save(message);
         } catch (RuntimeException ex) {
-            throw new DatabaseException("Ошибка соединения с базой данных", ex.getCause());
+            throw new DatabaseException();
         }
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<Message> getAllMessage() {
+    public List<Message> getAllMessage() throws DatabaseException, NoSuchMessageException{
         List<Message> messages;
         try {
             messages = messageRepository.findAll();
         } catch (RuntimeException ex) {
-            throw new DatabaseException("Ошибка соединения с базой данных", ex.getCause());
+            throw new DatabaseException();
         }
         if (messages.isEmpty()) {
             throw new NoSuchMessageException("Ваши сообщения не найдены");
         }
-        return messageRepository.findAll();
+        return messages;
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Message findMessageById(String id) {
-        Optional<Message> message;
+    public Message findMessageById(String id) throws DatabaseException, NoSuchMessageException{
         try {
-            message = messageRepository.findById(id);
+            return messageRepository.findById(id).orElseThrow(() ->
+                    new NoSuchMessageException("Сообщение не найдено"));
         } catch (RuntimeException ex) {
-            throw new DatabaseException("Ошибка соединения с базой данных", ex.getCause());
+            throw new DatabaseException();
         }
-        if (message.isEmpty()) {
-            throw new NoSuchMessageException("Сообщение не найдено");
-        }
-        return message.get();
     }
 
     @Override
     @Transactional
-    public Message updateMessage(Message message) {
-        Optional<Message> updateMessage;
+    public Message updateMessage(Message message) throws DatabaseException, NoSuchMessageException{
         try {
-            updateMessage = Optional.of(messageRepository.save(message));
+            return Optional.of(messageRepository.save(message)).orElseThrow(() ->
+                    new NoSuchMessageException("Обновляемое сообщение не найдено"));
         } catch (RuntimeException ex) {
-            throw new DatabaseException("Ошибка соединения с базой данных", ex.getCause());
+            throw new DatabaseException();
         }
-        if (updateMessage.isEmpty()) {
-            throw new NoSuchMessageException("Обновляемое сообщение не найдено");
-        }
-        return updateMessage.get();
     }
 
     @Override
     @Transactional
-    public void deleteMessageById(String id) {
-        Optional<Message> message;
+    public void deleteMessageById(String id) throws DatabaseException, NoSuchMessageException{
         try {
-            message = messageRepository.findById(id);
-        } catch (RuntimeException ex) {
-            throw new DatabaseException("Ошибка соединения с базой данных", ex.getCause());
-        }
-        if (message.isEmpty()) {
-            throw new NoSuchUserException("Удаляемое сообщение не найдено");
-        }
-        try {
+            findMessageById(id);
             messageRepository.deleteById(id);
         } catch (RuntimeException ex) {
-            throw new DatabaseException("Ошибка соединения с базой данных", ex.getCause());
+            throw new DatabaseException();
         }
     }
 }

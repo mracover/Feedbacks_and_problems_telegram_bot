@@ -21,75 +21,59 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public User addUser(User user) {
+    public User addUser(User user) throws DatabaseException {
         try {
             return userRepository.save(user);
         } catch (RuntimeException ex) {
-            throw new DatabaseException("Ошибка соединения с базой данных", ex.getCause());
+            throw new DatabaseException();
         }
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<User> getAllUsers() {
+    public List<User> getAllUsers() throws DatabaseException, NoSuchUserException {
         List<User> users;
         try {
             users = userRepository.findAll();
         } catch (RuntimeException ex) {
-            throw new DatabaseException("Ошибка соединения с базой данных", ex.getCause());
+            throw new DatabaseException();
         }
         if (users.isEmpty()) {
             throw new NoSuchUserException("Пользователи не найдены");
         }
-        return userRepository.findAll();
+        return users;
     }
 
     @Override
     @Transactional(readOnly = true)
-    public User findUserById(String id) {
-        Optional<User> user;
+    public User findUserById(String id) throws DatabaseException, NoSuchUserException {
         try {
-            user = userRepository.findById(id);
+            return userRepository.findById(id).orElseThrow(() ->
+                    new NoSuchUserException("Пользователь не найден"));
         } catch (RuntimeException ex) {
-            throw new DatabaseException("Ошибка соединения с базой данных", ex.getCause());
+            throw new DatabaseException();
         }
-        if (user.isEmpty()) {
-            throw new NoSuchUserException("Пользователь не найден");
-        }
-        return user.get();
     }
 
     @Override
     @Transactional
-    public User updateUser(User user) {
-        Optional<User> updateUser;
+    public User updateUser(User user) throws DatabaseException, NoSuchUserException {
         try {
-            updateUser = Optional.of(userRepository.save(user));
+            return Optional.of(userRepository.save(user)).orElseThrow(() ->
+                    new NoSuchUserException("Обновляемый пользователь не найден"));
         } catch (RuntimeException ex) {
-            throw new DatabaseException("Ошибка соединения с базой данных", ex.getCause());
+            throw new DatabaseException();
         }
-        if (updateUser.isEmpty()) {
-            throw new NoSuchUserException("Обновляемый пользователь не найден");
-        }
-        return updateUser.get();
     }
 
     @Override
     @Transactional
-    public void deleteProductById(String id) {
-        Optional<User> user;
+    public void deleteProductById(String id) throws DatabaseException, NoSuchUserException {
         try {
-            user = userRepository.findById(id);
-        } catch (RuntimeException ex) {
-            throw new DatabaseException("Ошибка соединения с базой данных", ex.getCause());
-        }
-        if (user.isEmpty()) {
-            throw new NoSuchUserException("Удаляемый пользователь не найден");
-        }
-        try {
+            findUserById(id);
             userRepository.deleteById(id);
         } catch (RuntimeException ex) {
-            throw new DatabaseException("Ошибка соединения с базой данных", ex.getCause());
+            throw new DatabaseException();
         }
     }
 }
