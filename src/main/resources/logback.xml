@@ -2,6 +2,14 @@
 
     <property name="HOME_LOG" value="logs/app.log"/>
 
+    <!-- Send debug messages to System.out -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <!-- By default, encoders are assigned the type ch.qos.logback.classic.encoder.PatternLayoutEncoder -->
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{5} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
     <appender name="FILE-ROLLING" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${HOME_LOG}</file>
 
@@ -19,14 +27,18 @@
 
     <logger name="com.mracover.telegram_bot" level="debug" additivity="false">
         <appender-ref ref="FILE-ROLLING"/>
+        <appender-ref ref="STDOUT" />
     </logger>
 
     <root level="error">
         <appender-ref ref="FILE-ROLLING"/>
+        <appender-ref ref="STDOUT" />
     </root>
 
     <root level="info">
         <appender-ref ref="FILE-ROLLING"/>
+        <appender-ref ref="STDOUT" />
     </root>
+
 
 </configuration>

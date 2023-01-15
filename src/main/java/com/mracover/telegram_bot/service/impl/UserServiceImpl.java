@@ -46,7 +46,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
-    public User findUserById(String id) throws DatabaseException, NoSuchUserException {
+    public User findUserById(Long id) throws DatabaseException, NoSuchUserException {
         try {
             return userRepository.findById(id).orElseThrow(() ->
                     new NoSuchUserException("Пользователь не найден"));
@@ -68,7 +68,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void deleteProductById(String id) throws DatabaseException, NoSuchUserException {
+    public void deleteUserById(Long id) throws DatabaseException, NoSuchUserException {
         try {
             findUserById(id);
             userRepository.deleteById(id);

@@ -1,29 +1,37 @@
 package com.mracover.telegram_bot.model;
 
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.data.mongodb.core.index.Indexed;
-import org.springframework.data.mongodb.core.mapping.DBRef;
-import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.FieldType;
-import org.springframework.data.mongodb.core.mapping.MongoId;
 
 import java.util.List;
 
-@Document("user")
+@Entity(name = "users")
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class User {
-    @MongoId(FieldType.OBJECT_ID)
-    private String id;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
+
+    @Column(name = "telegramUserId")
     private Long telegramUserId;
+
+    @Column(name = "name")
     private String name;
-    @Indexed
+
+    @Column(name = "email")
     private String email;
-    @DBRef
-    private List<Message> message;
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "user")
+    private List<Problem> problems;
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "user")
+    private List<Feedback> feedbacks;
+
 }
