@@ -1,6 +1,7 @@
 package com.mracover.telegram_bot.exception;
 
-import com.mracover.telegram_bot.exception.messageException.NoSuchMessageException;
+import com.mracover.telegram_bot.exception.feedbackException.NoSuchFeedbackException;
+import com.mracover.telegram_bot.exception.problemException.NoSuchProblemException;
 import com.mracover.telegram_bot.exception.userException.NoSuchUserException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +18,6 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(data, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-//    Исключения для UserController
     @ExceptionHandler(NoSuchUserException.class)
     public ResponseEntity<GlobalExceptionResponse> noSuchUserExceptionHandle(NoSuchUserException exception) {
         GlobalExceptionResponse data = new GlobalExceptionResponse();
@@ -25,9 +25,15 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(data, HttpStatus.NOT_FOUND);
     }
 
-//    Исключения для MessageController
-    @ExceptionHandler(NoSuchMessageException.class)
-    public ResponseEntity<GlobalExceptionResponse> noSuchMessageExceptionHandle(NoSuchMessageException exception) {
+    @ExceptionHandler(NoSuchProblemException.class)
+    public ResponseEntity<GlobalExceptionResponse> noSuchProblemExceptionHandle(NoSuchProblemException exception) {
+        GlobalExceptionResponse data = new GlobalExceptionResponse();
+        data.setMessage(exception.getMessage());
+        return new ResponseEntity<>(data, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(NoSuchFeedbackException.class)
+    public ResponseEntity<GlobalExceptionResponse> noSuchFeedbackExceptionHandle(NoSuchFeedbackException exception) {
         GlobalExceptionResponse data = new GlobalExceptionResponse();
         data.setMessage(exception.getMessage());
         return new ResponseEntity<>(data, HttpStatus.NOT_FOUND);

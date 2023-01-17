@@ -6,11 +6,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Entity(name = "images")
+@Entity(name = "image")
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(name = "images")
 public class Image {
 
     @Id
@@ -20,4 +21,7 @@ public class Image {
     @Column(name = "image")
     private byte[] image;
 
+    public Image(byte[] image) {
+        this.image = image;
+    }
 }
