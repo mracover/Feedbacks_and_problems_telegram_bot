@@ -1,0 +1,21 @@
+package com.mracover.telegram_bot.botapi;
+
+//Возможные состояния бота
+
+public enum BotState {
+    START,
+    FEEDBACK,
+    PROBLEM,
+    ASK_PROBLEM_NAME,
+    ASK_PROBLEM_EMAIL,
+    ASK_FEEDBACK_NAME,
+    ASK_FEEDBACK_EMAIL,
+    ASK_FEEDBACK_PRODUCT,
+    ASK_PROBLEM_PRODUCT,
+    ASK_PROBLEM_MESSAGE,
+    ASK_IMAGES_PROBLEM,
+    ASK_FEEDBACK_MESSAGE,
+    ASK_IMAGES_FEEDBACK,
+    PROBLEM_END,
+    FEEDBACK_END
+}
