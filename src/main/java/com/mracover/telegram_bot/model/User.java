@@ -1,6 +1,8 @@
 package com.mracover.telegram_bot.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.util.ArrayList;
@@ -11,7 +13,6 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString
 @Table(name = "users")
 public class User {
 
@@ -23,9 +24,11 @@ public class User {
     private long telegramUserId;
 
     @Column(name = "name")
+    @Size(max = 20)
     private String name;
 
     @Column(name = "email")
+    @Email
     private String email;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "user")
@@ -33,20 +36,6 @@ public class User {
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "user")
     private List<Feedback> feedbacks = new ArrayList<>();
-
-    public void setProblems(List<Problem> problems) {
-        if (problems !=null) {
-            problems.forEach(s -> s.setUser(this));
-        }
-        this.problems = problems;
-    }
-
-    public void setFeedbacks(List<Feedback> feedbacks) {
-        if (feedbacks !=null) {
-            feedbacks.forEach(s -> s.setUser(this));
-        }
-        this.feedbacks = feedbacks;
-    }
 
     public void setProblem (Problem problem) {
         problems.add(problem);
@@ -56,5 +45,17 @@ public class User {
     public void setFeedback (Feedback feedback) {
         feedbacks.add(feedback);
         feedback.setUser(this);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder stringProblems = new StringBuilder();
+        StringBuilder stringFeedbacks = new StringBuilder();
+        problems.forEach(problem -> stringProblems.append(problems.toString()));
+        feedbacks.forEach(feedback -> stringFeedbacks.append(feedback.toString()));
+        return  " Имя ='" + name + '\n' +
+                ", email='" + email + '\n' +
+                ", problems=" + stringProblems.toString() + '\n' +
+                ", feedbacks=" + stringFeedbacks.toString() ;
     }
 }

@@ -44,4 +44,11 @@ public class Feedback {
     @JoinColumn(name = "image_id")
     private Image image;
 
+    @Override
+    public String toString() {
+        return "Отзыв{" +
+                ", id товара=" + product_id +
+                ", Сообщение='" + feedbackMessage + "\n" +
+                "}\n";
+    }
 }

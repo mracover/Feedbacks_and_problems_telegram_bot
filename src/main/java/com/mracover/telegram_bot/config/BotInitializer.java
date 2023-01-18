@@ -1,6 +1,6 @@
 package com.mracover.telegram_bot.config;
 
-import com.mracover.telegram_bot.service.TelegramBot;
+import com.mracover.telegram_bot.controller.TelegramBot;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextRefreshedEvent;

@@ -2,7 +2,7 @@ package com.mracover.telegram_bot.botapi;
 
 
 import com.mracover.telegram_bot.cache.UserDataCache;
-import com.mracover.telegram_bot.controller.UpdateController;
+import com.mracover.telegram_bot.service.handlers.OtherCommandHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -17,14 +17,14 @@ public class TelegramFacade {
 
     private BotStateContext botStateContext;
     private UserDataCache userDataCache;
-    private UpdateController updateController;
+    private OtherCommandHandler otherCommandHandler;
 
     public TelegramFacade(BotStateContext botStateContext,
                           UserDataCache userDataCache,
-                          UpdateController updateController) {
+                          OtherCommandHandler otherCommandHandler) {
         this.botStateContext = botStateContext;
         this.userDataCache = userDataCache;
-        this.updateController = updateController;
+        this.otherCommandHandler = otherCommandHandler;
     }
 
     //Отправка на обработку
@@ -48,7 +48,7 @@ public class TelegramFacade {
             String inputMsg = message.getText();
             switch (inputMsg) {
                 case "/start":
-                    replyMessage = updateController.startCommand(chatId);
+                    replyMessage = otherCommandHandler.startCommand(chatId);
                     break;
                 case "/problem":
                     botState = BotState.PROBLEM;
@@ -57,13 +57,13 @@ public class TelegramFacade {
                     botState = BotState.FEEDBACK;
                     break;
                 case "/mydata":
-                    replyMessage = updateController.myDataCommand(userId, chatId);
+                    replyMessage = otherCommandHandler.myDataCommand(userId, chatId);
                     break;
                 case "/deletedata":
-                    replyMessage = updateController.deleteDataCommand(userId, chatId);
+                    replyMessage = otherCommandHandler.deleteDataCommand(userId, chatId);
                     break;
                 case "/help":
-                    replyMessage = updateController.helpCommand(chatId);
+                    replyMessage = otherCommandHandler.helpCommand(chatId);
                     break;
                 default:
                     break;

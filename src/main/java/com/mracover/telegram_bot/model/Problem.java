@@ -43,4 +43,11 @@ public class Problem {
     @JoinColumn(name = "image_id")
     private Image image;
 
+    @Override
+    public String toString() {
+        return "Проблема{" +
+                "id товара=" + product_id +
+                "Cообщение='" + problemMessage + "\n" +
+                "}\n";
+    }
 }

@@ -90,13 +90,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
-    public User findUserByTelegramId(Long userId) throws DatabaseException, NoSuchUserException {
-        try {
-            return userRepository.findUserByTelegramUserId(userId).orElseThrow(() ->
-                    new NoSuchUserException("Пользователь не найден"));
-        } catch (RuntimeException ex) {
-            throw new DatabaseException();
-        }
+    public User findUserByTelegramId(Long userId)  {
+        return userRepository.findUserByTelegramUserId(userId);
     }
 
 }

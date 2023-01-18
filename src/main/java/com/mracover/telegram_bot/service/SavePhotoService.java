@@ -36,14 +36,19 @@ public class SavePhotoService {
         ResponseEntity<String> response = getFilePath(fileId);
         if (response.getStatusCode() == HttpStatus.OK) {
             String path = getFilePath(response);
-            image.setImage(downloadFile(path));
-            log.info("Файл успешно скачался");
+            if (downloadFile(path) != null) {
+                image.setImage(downloadFile(path));
+                log.info("Файл успешно скачался");
+            } else {
+                return null;
+            }
         }
         return image;
     }
 
     private byte[] downloadFile(String filePath) {
-        String fullUri = "https://api.telegram.org/file/bot"+token+"/"+filePath;
+        String fullUri = fileStorageUri.replace("{token}", token)
+                .replace("{filePath}", filePath);
         URL urlObj = null;
         log.info("файл начал сохраняться");
         try {
@@ -52,7 +57,6 @@ public class SavePhotoService {
             log.error(e.getMessage());
         }
 
-        //TODO подумать над оптимизацией
         try (InputStream is = urlObj.openStream()) {
             return is.readAllBytes();
         } catch (IOException e) {

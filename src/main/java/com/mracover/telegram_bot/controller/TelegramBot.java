@@ -1,9 +1,8 @@
-package com.mracover.telegram_bot.service;
+package com.mracover.telegram_bot.controller;
 
 import com.mracover.telegram_bot.botapi.TelegramFacade;
 import com.mracover.telegram_bot.components.BotCommands;
 import com.mracover.telegram_bot.config.BotConfig;
-import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
