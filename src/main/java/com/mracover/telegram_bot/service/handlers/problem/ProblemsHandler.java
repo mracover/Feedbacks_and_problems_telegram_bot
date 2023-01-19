@@ -7,11 +7,9 @@ import com.mracover.telegram_bot.components.StringCommandProblem;
 import com.mracover.telegram_bot.model.Image;
 import com.mracover.telegram_bot.model.Problem;
 import com.mracover.telegram_bot.model.User;
-import com.mracover.telegram_bot.service.ProblemService;
 import com.mracover.telegram_bot.service.ReplyMessageService;
 import com.mracover.telegram_bot.service.SavePhotoService;
 import com.mracover.telegram_bot.service.UserService;
-import jakarta.validation.ValidationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -25,31 +23,35 @@ public class ProblemsHandler implements InputMessageHandler {
     private final UserDataCache userDataCache;
     private final UserService userService;
     private final SavePhotoService savePhotoService;
-    private final ProblemService problemService;
-    private User user = new User();
+    private User user;
     private final Problem problem = new Problem();
 
     public ProblemsHandler(ReplyMessageService replyMessageService,
                            UserDataCache userDataCache,
                            UserService userService,
-                           SavePhotoService savePhotoService,
-                           ProblemService problemService) {
+                           SavePhotoService savePhotoService) {
         this.replyMessageService = replyMessageService;
         this.userDataCache = userDataCache;
         this.userService = userService;
         this.savePhotoService = savePhotoService;
-        this.problemService = problemService;
     }
 
     @Override
     public SendMessage handle(Message message) {
-        if (checkingUser(message.getFrom().getId()) &&
-                userDataCache.getUsersCurrentBotState(message.getFrom().getId()).equals(BotState.PROBLEM)) {
-            userDataCache.setUsersCurrentBotState(message.getFrom().getId(), BotState.ASK_PROBLEM_PRODUCT);
+        long userId = message.getFrom().getId();
+        //Проверка пользователя в бд, пропускает этап имя и почты
+        if (checkingUser(userId) &&
+                userDataCache.getUsersCurrentBotState(userId).equals(BotState.PROBLEM)) {
+            user = userService.findUserByTelegramId(userId);
+            userDataCache.setUsersCurrentBotState(userId, BotState.ASK_PROBLEM_PRODUCT);
+            log.info("Пользователь найден");
         }
-        if (!checkingUser(message.getFrom().getId()) &&
-                userDataCache.getUsersCurrentBotState(message.getFrom().getId()).equals(BotState.PROBLEM)) {
-            userDataCache.setUsersCurrentBotState(message.getFrom().getId(), BotState.ASK_PROBLEM_NAME);
+        //Спрашивает имя, если пользователь не найден
+        if (!checkingUser(userId) &&
+                userDataCache.getUsersCurrentBotState(userId).equals(BotState.PROBLEM)) {
+            user = new User();
+            user.setTelegramUserId(userId);
+            userDataCache.setUsersCurrentBotState(userId, BotState.ASK_PROBLEM_NAME);
         }
         return processUsersInput(message);
     }
@@ -67,39 +69,30 @@ public class ProblemsHandler implements InputMessageHandler {
 
         SendMessage replyToUser = null;
 
-        user.setTelegramUserId(userId);
-
         if (botState.equals(BotState.ASK_PROBLEM_NAME)) {
             replyToUser = replyMessageService.getReplyMessage(chatId, StringCommandProblem.PROBLEM_TEXT_NAME);
             userDataCache.setUsersCurrentBotState(userId, BotState.ASK_PROBLEM_EMAIL);
         }
 
         if (botState.equals(BotState.ASK_PROBLEM_EMAIL)) {
-            try {
-                user.setName(userAnswer);
-                log.info(userAnswer + "-  имя");
-                replyToUser = replyMessageService.getReplyMessage(chatId, StringCommandProblem.PROBLEM_TEXT_EMAIL);
-                userDataCache.setUsersCurrentBotState(userId, BotState.ASK_PROBLEM_PRODUCT);
-            } catch (ValidationException ex){
-                log.error("Пользователь ввел неправильное имя:" + ex.getMessage());
+            if (userAnswer.length() > 20) {
+                log.error("Пользователь ввел неправильное имя");
                 replyToUser = replyMessageService.getReplyMessage(chatId, "Неправильно введено имя, введите еще раз:");
                 userDataCache.setUsersCurrentBotState(userId, BotState.ASK_PROBLEM_EMAIL);
+            } else {
+                user.setName(userAnswer);
+                log.info(userAnswer + "- имя пользователя");
+                replyToUser = replyMessageService.getReplyMessage(chatId, StringCommandProblem.PROBLEM_TEXT_EMAIL);
+                userDataCache.setUsersCurrentBotState(userId, BotState.ASK_PROBLEM_PRODUCT);
             }
         }
 
         if (botState.equals(BotState.ASK_PROBLEM_PRODUCT)) {
-            try {
-                if (userService.findUserByTelegramId(userId) == null) {
-                    user.setEmail(userAnswer);
-                }
-                log.info(userAnswer + "- email");
-                replyToUser = replyMessageService.getReplyMessage(chatId, StringCommandProblem.PROBLEM_TEXT_PRODUCT);
-                userDataCache.setUsersCurrentBotState(userId, BotState.ASK_PROBLEM_MESSAGE);
-            } catch (ValidationException ex) {
-                log.error("Неправильный email:" + ex.getMessage());
-                replyToUser = replyMessageService.getReplyMessage(chatId, "Неправильно введен email, введите еще раз:");
-                userDataCache.setUsersCurrentBotState(userId, BotState.ASK_PROBLEM_PRODUCT);
+            if (user.getEmail() == null) {
+                user.setEmail(userAnswer);
             }
+            replyToUser = replyMessageService.getReplyMessage(chatId, StringCommandProblem.PROBLEM_TEXT_PRODUCT);
+            userDataCache.setUsersCurrentBotState(userId, BotState.ASK_PROBLEM_MESSAGE);
         }
 
         if (botState.equals(BotState.ASK_PROBLEM_MESSAGE)) {
@@ -117,8 +110,9 @@ public class ProblemsHandler implements InputMessageHandler {
         }
 
         if (botState.equals(BotState.PROBLEM_END)) {
-            Image image = savePhotoService.downloadPhotoAndGetEntity(inputMsg);
-            if (image != null) {
+            Image image = null;
+            if (inputMsg.hasPhoto()) {
+                image = savePhotoService.downloadPhotoAndGetEntity(inputMsg);
                 log.info("фоторафия скачана и сохранена");
             }
             saveProblem(user, problem, image);
@@ -132,21 +126,20 @@ public class ProblemsHandler implements InputMessageHandler {
     }
 
     private void saveProblem(User user, Problem problem, Image image) {
-        User upUser = userService.findUserByTelegramId(user.getTelegramUserId());
+        Problem problem1 = new Problem();
+        problem1.setProblemMessage(problem.getProblemMessage());
+        problem1.setProduct_id(problem.getProduct_id());
         if(image != null) {
-            problem.setImage(image);
+            image.setFeedback(null);
+            problem1.setImage(image);
+            log.info("фотография присвоенна");
         }
-        if (upUser == null) {
-            user.setProblem(problem);
-            userService.addUser(user);
-        } else {
-            problem.setUser(upUser);
-            problemService.addProblem(problem);
-        }
+        user.setProblem(problem1);
+        userService.addUser(user);
     }
 
     private boolean checkingUser(long userId) {
-        user = userService.findUserByTelegramId(userId);
-        return user != null;
+        User userByTelegramId = userService.findUserByTelegramId(userId);
+        return userByTelegramId != null;
     }
 }

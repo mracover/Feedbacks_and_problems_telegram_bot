@@ -14,7 +14,7 @@ import java.util.Optional;
 @Service
 public class FeedbackServiceImpl implements FeedbackService {
 
-    private FeedbackRepository feedbackRepository;
+    private final FeedbackRepository feedbackRepository;
 
     public FeedbackServiceImpl(FeedbackRepository feedbackRepository) {
         this.feedbackRepository = feedbackRepository;

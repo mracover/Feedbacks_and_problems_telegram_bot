@@ -15,9 +15,9 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 @Slf4j
 public class TelegramFacade {
 
-    private BotStateContext botStateContext;
-    private UserDataCache userDataCache;
-    private OtherCommandHandler otherCommandHandler;
+    private final BotStateContext botStateContext;
+    private final UserDataCache userDataCache;
+    private final OtherCommandHandler otherCommandHandler;
 
     public TelegramFacade(BotStateContext botStateContext,
                           UserDataCache userDataCache,
@@ -47,26 +47,12 @@ public class TelegramFacade {
             String chatId = String.valueOf(message.getChatId());
             String inputMsg = message.getText();
             switch (inputMsg) {
-                case "/start":
-                    replyMessage = otherCommandHandler.startCommand(chatId);
-                    break;
-                case "/problem":
-                    botState = BotState.PROBLEM;
-                    break;
-                case "/feedback":
-                    botState = BotState.FEEDBACK;
-                    break;
-                case "/mydata":
-                    replyMessage = otherCommandHandler.myDataCommand(userId, chatId);
-                    break;
-                case "/deletedata":
-                    replyMessage = otherCommandHandler.deleteDataCommand(userId, chatId);
-                    break;
-                case "/help":
-                    replyMessage = otherCommandHandler.helpCommand(chatId);
-                    break;
-                default:
-                    break;
+                case "/start" -> replyMessage = otherCommandHandler.startCommand(chatId);
+                case "/problem" -> botState = BotState.PROBLEM;
+                case "/feedback" -> botState = BotState.FEEDBACK;
+                case "/mydata" -> replyMessage = otherCommandHandler.myDataCommand(userId, chatId);
+                case "/deletedata" -> replyMessage = otherCommandHandler.deleteDataCommand(userId, chatId);
+                case "/help" -> replyMessage = otherCommandHandler.helpCommand(chatId);
             }
         } else {
             botState = userDataCache.getUsersCurrentBotState(userId);

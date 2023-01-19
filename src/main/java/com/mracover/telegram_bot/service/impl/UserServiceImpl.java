@@ -5,6 +5,7 @@ import com.mracover.telegram_bot.exception.userException.NoSuchUserException;
 import com.mracover.telegram_bot.model.User;
 import com.mracover.telegram_bot.repository.UserRepository;
 import com.mracover.telegram_bot.service.UserService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,6 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Slf4j
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 
@@ -25,6 +27,7 @@ public class UserServiceImpl implements UserService {
         try {
             return userRepository.save(user);
         } catch (RuntimeException ex) {
+            log.error(ex.getMessage());
             throw new DatabaseException();
         }
     }
@@ -59,7 +62,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public User updateUser(User user) throws DatabaseException, NoSuchUserException {
         try {
-            return Optional.of(userRepository.save(user)).orElseThrow(() ->
+            return Optional.of(userRepository.saveAndFlush(user)).orElseThrow(() ->
                     new NoSuchUserException("Обновляемый пользователь не найден"));
         } catch (RuntimeException ex) {
             throw new DatabaseException();

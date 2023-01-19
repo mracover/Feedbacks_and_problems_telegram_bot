@@ -15,13 +15,15 @@ import lombok.Setter;
 public class Image {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
 
     @Column(name = "image")
     private byte[] image;
 
-    public Image(byte[] image) {
-        this.image = image;
-    }
+    @OneToOne(mappedBy = "image")
+    private Feedback feedback;
+
+    @OneToOne(mappedBy = "image")
+    private Problem problem;
 }

@@ -8,6 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+
+//Исключения для UserController, Feedback и Problem Controllers
 @ControllerAdvice
 public class GlobalExceptionHandler {
 

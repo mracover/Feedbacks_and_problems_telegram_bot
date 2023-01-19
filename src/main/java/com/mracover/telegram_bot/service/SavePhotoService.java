@@ -27,6 +27,7 @@ public class SavePhotoService {
     @Value("${service.file_info.uri}")
     private String fileInfoUri;
 
+    //Скачивает файл и создает image, если фотография имеется
     public Image downloadPhotoAndGetEntity(Message inputMsg) {
         Image image = new Image();
         int photoSizeCount = inputMsg.getPhoto().size();
@@ -46,6 +47,7 @@ public class SavePhotoService {
         return image;
     }
 
+    //Отправляет запрос на скачивания файла
     private byte[] downloadFile(String filePath) {
         String fullUri = fileStorageUri.replace("{token}", token)
                 .replace("{filePath}", filePath);
@@ -65,6 +67,7 @@ public class SavePhotoService {
         return null;
     }
 
+    //Путь до фотографии
     private ResponseEntity<String> getFilePath(String fileId) {
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
@@ -79,6 +82,8 @@ public class SavePhotoService {
         );
     }
 
+
+    //Достает путь, из json
     private String getFilePath(ResponseEntity<String> response) {
         JSONObject jsonObject = new JSONObject(response.getBody());
         return String.valueOf(jsonObject

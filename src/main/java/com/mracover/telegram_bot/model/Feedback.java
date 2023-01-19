@@ -6,10 +6,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.ArrayList;
-import java.util.List;
-
-
 @Entity(name = "feedback")
 @Getter
 @Setter
@@ -19,7 +15,7 @@ import java.util.List;
 public class Feedback {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
 
     @Column(name = "product_id")
@@ -28,27 +24,24 @@ public class Feedback {
     @Column(name = "feedbackMessage")
     private String feedbackMessage;
 
-    @ManyToOne(
-            cascade = {
-                    CascadeType.REFRESH,
-                    CascadeType.DETACH,
-                    CascadeType.MERGE,
-                    CascadeType.PERSIST
-            },
-            fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id")
     private User user;
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @MapsId
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "image_id")
     private Image image;
+
+    public void setImage(Image image) {
+        this.image = image;
+        this.image.setFeedback(this);
+    }
 
     @Override
     public String toString() {
         return "Отзыв{" +
                 ", id товара=" + product_id +
-                ", Сообщение='" + feedbackMessage + "\n" +
+                ", Сообщение='" + feedbackMessage +
                 "}\n";
     }
 }

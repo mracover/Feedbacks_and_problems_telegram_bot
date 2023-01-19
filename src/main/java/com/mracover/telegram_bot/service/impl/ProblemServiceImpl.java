@@ -15,7 +15,7 @@ import java.util.Optional;
 @Service
 public class ProblemServiceImpl implements ProblemService {
 
-    private ProblemRepository problemRepository;
+    private final ProblemRepository problemRepository;
 
     public ProblemServiceImpl(ProblemRepository problemRepository) {
         this.problemRepository = problemRepository;

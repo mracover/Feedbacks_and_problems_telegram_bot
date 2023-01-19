@@ -10,7 +10,7 @@ import java.util.Map;
  Сохраняем статут бота для пользователей*/
 @Component
 public class UserDataCache implements DataCache{
-    private Map<Long, BotState> usersBotsStates = new HashMap<>();
+    private final Map<Long, BotState> usersBotsStates = new HashMap<>();
 
     @Override
     public void setUsersCurrentBotState(long userId, BotState botState) {

@@ -8,5 +8,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
     public void deleteUserByTelegramUserId(Long chatId);
-    public User findUserByTelegramUserId(Long chatId);
+    public User findUserByTelegramUserId(Long userId);
+
 }
