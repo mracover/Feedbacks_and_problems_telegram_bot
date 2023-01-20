@@ -96,8 +96,14 @@ public class ProblemsHandler implements InputMessageHandler {
         }
 
         if (botState.equals(BotState.ASK_PROBLEM_MESSAGE)) {
+            try {
+                problem.setProduct_id(Integer.parseInt(userAnswer));
+            } catch (ClassCastException ex) {
+                log.error(ex.getMessage());
+                replyToUser = replyMessageService.getReplyMessage(chatId, "Неправильное id, введите еще раз:");
+                userDataCache.setUsersCurrentBotState(userId, BotState.ASK_PROBLEM_MESSAGE);
+            }
             replyToUser = replyMessageService.getReplyMessage(chatId, StringCommandProblem.PROBLEM_TEXT_MESSAGE);
-            problem.setProduct_id(Integer.parseInt(userAnswer));
             log.info(userAnswer + "- номер продукта");
             userDataCache.setUsersCurrentBotState(userId, BotState.ASK_IMAGES_PROBLEM);
         }

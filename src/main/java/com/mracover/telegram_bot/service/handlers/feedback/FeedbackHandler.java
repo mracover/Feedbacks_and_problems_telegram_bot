@@ -96,8 +96,14 @@ public class FeedbackHandler implements InputMessageHandler {
         }
 
         if (botState.equals(BotState.ASK_FEEDBACK_MESSAGE)) {
+            try {
+                feedback.setProduct_id(Integer.parseInt(userAnswer));
+            } catch (ClassCastException ex) {
+                log.error(ex.getMessage());
+                replyToUser = replyMessageService.getReplyMessage(chatId, "Неправильное id, введите еще раз:");
+                userDataCache.setUsersCurrentBotState(userId, BotState.ASK_FEEDBACK_MESSAGE);
+            }
             replyToUser = replyMessageService.getReplyMessage(chatId, StringCommandFeedback.FEEDBACK_TEXT_MESSAGE);
-            feedback.setProduct_id(Integer.parseInt(userAnswer));
             log.info(userAnswer +"- номер продукта");
             userDataCache.setUsersCurrentBotState(userId, BotState.ASK_IMAGES_FEEDBACK);
         }
