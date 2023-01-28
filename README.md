@@ -36,11 +36,7 @@ _____
 
 Демонстрация работы команды `/feedback`:
 
-<div align="center">
-<video height="300" width="500" controls>
-<source src="./readme_assets/feedback.MP4">
-</video>
-</div>
+![feedback](/./readme_assets/feedback.MP4)
 
 **Учтите, что только при первом использовании вас спросить имя и email. Они заносятся в базу 
 и повторно спрашиваться не будут.**
