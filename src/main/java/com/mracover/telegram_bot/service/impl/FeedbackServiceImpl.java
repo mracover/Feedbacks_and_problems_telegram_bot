@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class FeedbackServiceImpl implements FeedbackService {
@@ -51,6 +50,8 @@ public class FeedbackServiceImpl implements FeedbackService {
         try {
             return feedbackRepository.findById(id).orElseThrow(() ->
                     new NoSuchFeedbackException("Отзыв не найден"));
+        } catch (NoSuchFeedbackException ex) {
+            throw new NoSuchFeedbackException(ex.getMessage());
         } catch (RuntimeException ex) {
             throw new DatabaseException();
         }
@@ -60,8 +61,13 @@ public class FeedbackServiceImpl implements FeedbackService {
     @Transactional
     public Feedback updateFeedback(Feedback feedback) throws DatabaseException, NoSuchFeedbackException  {
         try {
-            return Optional.of(feedbackRepository.save(feedback)).orElseThrow(() ->
-                    new NoSuchFeedbackException("Обновляемый отзыв не найден"));
+            Feedback upFeedback = feedbackRepository.save(feedback);
+            if (upFeedback == null) {
+                throw new NoSuchFeedbackException("Обновляемый отзыв не найден");
+            }
+            return upFeedback;
+        } catch (NoSuchFeedbackException ex) {
+            throw new NoSuchFeedbackException(ex.getMessage());
         } catch (RuntimeException ex) {
             throw new DatabaseException();
         }
@@ -69,7 +75,7 @@ public class FeedbackServiceImpl implements FeedbackService {
 
     @Override
     @Transactional
-    public void deleteFeedbackById(Long id) throws DatabaseException, NoSuchFeedbackException  {
+    public void deleteFeedbackById(Long id) throws DatabaseException  {
         try {
             findFeedbackById(id);
             feedbackRepository.deleteById(id);

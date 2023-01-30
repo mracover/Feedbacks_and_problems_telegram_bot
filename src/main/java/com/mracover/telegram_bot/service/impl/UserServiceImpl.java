@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @Slf4j
@@ -53,7 +52,10 @@ public class UserServiceImpl implements UserService {
         try {
             return userRepository.findById(id).orElseThrow(() ->
                     new NoSuchUserException("Пользователь не найден"));
-        } catch (RuntimeException ex) {
+        } catch (NoSuchUserException ex) {
+            throw new NoSuchUserException(ex.getMessage());
+        }
+        catch (RuntimeException ex) {
             throw new DatabaseException();
         }
     }
@@ -62,8 +64,13 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public User updateUser(User user) throws DatabaseException, NoSuchUserException {
         try {
-            return Optional.of(userRepository.saveAndFlush(user)).orElseThrow(() ->
-                    new NoSuchUserException("Обновляемый пользователь не найден"));
+            User upUser = userRepository.save(user);
+            if (upUser == null) {
+                throw new NoSuchUserException("Обновляемый пользователь не найден");
+            }
+            return upUser;
+        } catch (NoSuchUserException ex) {
+            throw new NoSuchUserException(ex.getMessage());
         } catch (RuntimeException ex) {
             throw new DatabaseException();
         }

@@ -52,6 +52,7 @@ public class FeedbackHandler implements InputMessageHandler {
             user = new User();
             user.setTelegramUserId(userId);
             userDataCache.setUsersCurrentBotState(userId, BotState.ASK_FEEDBACK_NAME);
+            log.info("Пользователь не найден");
         }
         return processUsersInput(message);
     }
